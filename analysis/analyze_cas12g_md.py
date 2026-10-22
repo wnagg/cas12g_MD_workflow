@@ -83,7 +83,7 @@ def main() -> None:
     run([args.gmx, "rms", "-s", str(tpr), "-f", str(xtc), "-n", str(index_file),
          "-o", str(rmsd_xvg), "-tu", "ns"], f"{ca_group}\n{ca_group}\n")
     run([args.gmx, "gyrate", "-s", str(tpr), "-f", str(xtc), "-n", str(index_file),
-         "-o", str(rg_xvg)], f"{protein_group}\n")
+         "-o", str(rg_xvg), "-tu", "ns"], f"{protein_group}\n")
     run([args.gmx, "rmsf", "-s", str(tpr), "-f", str(xtc), "-n", str(index_file),
          "-o", str(rmsf_xvg), "-res", "-b", str(args.begin_ns * 1000.0)], f"{ca_group}\n")
 
