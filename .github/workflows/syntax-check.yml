@@ -17,7 +17,7 @@ jobs:
         run: |
           bash -n scripts/preflight.sh
           bash -n scripts/run_md_new_protein.sh
-          bash -n scripts/run_cas12g_replicates.sh
+          bash -n scripts/run_cas12g_md.sh
       - name: Check Python syntax
         run: |
           python -m py_compile scripts/build_cas12g_mutants.py scripts/compare_replicates.py analysis/analyze_cas12g_md.py
