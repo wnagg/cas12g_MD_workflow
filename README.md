@@ -38,22 +38,22 @@ Clone the repository and create a local configuration file:
 ```bash
 git clone https://github.com/wnagg/cas12g_MD_workflow.git
 cd cas12g_MD_workflow
-cp env/Cas12g_3rep_400ns.env.example env/Cas12g_3rep_400ns.env
+cp env/Cas12g_MD.env.example env/Cas12g_MD.env
 ```
 
 Edit `WT_PDB`, `WORKDIR`, and the executable paths in the local configuration. Then run:
 
 ```bash
 python3 -m pip install -r requirements.txt
-bash scripts/preflight.sh env/Cas12g_3rep_400ns.env
-bash scripts/run_cas12g_replicates.sh env/Cas12g_3rep_400ns.env --build-only
-bash scripts/run_cas12g_replicates.sh env/Cas12g_3rep_400ns.env --pilot-only
+bash scripts/preflight.sh env/Cas12g_MD.env
+bash scripts/run_cas12g_md.sh env/Cas12g_MD.env --build-only
+bash scripts/run_cas12g_md.sh env/Cas12g_MD.env --pilot-only
 ```
 
 After checking the pilot output and confirming that the settings match the intended protocol, launch the production workflow:
 
 ```bash
-bash scripts/run_cas12g_replicates.sh env/Cas12g_3rep_400ns.env --run-only
+bash scripts/run_cas12g_md.sh env/Cas12g_MD.env --run-only
 ```
 
 The workflow uses a protein-only preparation by default. A system containing RNA, a ligand, a metal, or another required non-protein component needs an appropriately prepared structure and compatible topology; do not use the default protein-only preparation for such a complex.
