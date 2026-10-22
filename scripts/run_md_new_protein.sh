@@ -10,7 +10,7 @@ CONFIG_FILE="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 # shellcheck disable=SC1090
 source "$CONFIG_FILE"
 
-[[ -n "$GMX" && -n "$INPUT_PDB" && -n "$WORKDIR" && -n "$SYSTEM_NAME" ]] || {
+[[ -n "$GMX" && -n "$INPUT_PDB" && -n "$WORKDIR" && -n "$SYSTEM_NAME" && -n "$MDRUN_CPU_OPTS" && -n "$MDRUN_GPU_OPTS" ]] || {
   echo "ERROR: GMX, INPUT_PDB, WORKDIR and SYSTEM_NAME are required in config." >&2; exit 1;
 }
 if [[ "$GMX" == */* ]]; then
@@ -27,7 +27,7 @@ mkdir -p logs .done analysis
 exec > >(tee -a pipeline.log) 2>&1
 
 signature="$(
-  { printf '%s\n' "$SYSTEM_NAME" "$FORCEFIELD" "$WATER" "$BOX_TYPE" "$BOX_DIST_NM" "$SALT_MOLAR" "$TEMP_K" "$PRESSURE_BAR" "$NVT_PS" "$NPT_CA_PS" "$NPT_NOCA_PS" "$MD_NS" "$DT_PS" "$XTC_INTERVAL_PS" "$ENERGY_INTERVAL_PS" "$LOG_INTERVAL_PS" "$VELOCITY_SEED" "$CA_FC" "$MD_DEFFNM"; sha256sum "$INPUT_PDB"; } | sha256sum | awk '{print $1}'
+  { printf '%s\n' "$SYSTEM_NAME" "$FORCEFIELD" "$WATER" "$BOX_TYPE" "$BOX_DIST_NM" "$SALT_MOLAR" "$TEMP_K" "$PRESSURE_BAR" "$NVT_PS" "$NPT_CA_PS" "$NPT_NOCA_PS" "$MD_NS" "$DT_PS" "$XTC_INTERVAL_PS" "$ENERGY_INTERVAL_PS" "$LOG_INTERVAL_PS" "$VELOCITY_SEED" "$CA_FC" "$MD_DEFFNM" "$PREPARE_PROTEIN_ONLY" "$MDRUN_CPU_OPTS" "$MDRUN_GPU_OPTS"; sha256sum "$INPUT_PDB"; } | sha256sum | awk '{print $1}'
 )"
 if [[ -s .run_signature ]]; then
   [[ "$(cat .run_signature)" == "$signature" ]] || {
@@ -52,6 +52,8 @@ XTC_NSTEPS="$(calc_steps "$XTC_INTERVAL_PS")"
 ENERGY_NSTEPS="$(calc_steps "$ENERGY_INTERVAL_PS")"
 LOG_NSTEPS="$(calc_steps "$LOG_INTERVAL_PS")"
 EQUIL_XTC_NSTEPS="$(calc_steps 10)"
+read -r -a CPU_OPTS <<< "$MDRUN_CPU_OPTS"
+read -r -a GPU_OPTS <<< "$MDRUN_GPU_OPTS"
 
 run_stage() {
   local name="$1"; shift
@@ -254,7 +256,7 @@ topology_solvate_ions() {
 
 run_em() {
   "$GMX" grompp -f minim.mdp -c solvated_ions.gro -p topol.top -o em.tpr -maxwarn "$MAXWARN"
-  "$GMX" mdrun -deffnm em -v -nb cpu -pme cpu
+  "$GMX" mdrun -deffnm em -v "${CPU_OPTS[@]}"
   grep -E "Steepest Descents converged|Fmax|Potential Energy" em.log | tail -n 20 || true
 }
 
@@ -301,28 +303,28 @@ run_mdrun_resumable() {
 }
 run_nvt() {
   "$GMX" grompp -f nvt.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr -maxwarn "$MAXWARN"
-  run_mdrun_resumable nvt -nb cpu -pme cpu
+  run_mdrun_resumable nvt "${CPU_OPTS[@]}"
 }
 run_npt_ca() {
   "$GMX" grompp -f npt_ca.mdp -c nvt.gro -t nvt.cpt -r nvt.gro -p topol.top -o npt_ca.tpr -maxwarn "$MAXWARN"
-  run_mdrun_resumable npt_ca -nb cpu -pme cpu
+  run_mdrun_resumable npt_ca "${CPU_OPTS[@]}"
 }
 run_npt_noca() {
   "$GMX" grompp -f npt_noca.mdp -c npt_ca.gro -t npt_ca.cpt -p topol.top -o npt_noca.tpr -maxwarn "$MAXWARN"
-  run_mdrun_resumable npt_noca -nb cpu -pme cpu
+  run_mdrun_resumable npt_noca "${CPU_OPTS[@]}"
 }
 prepare_production() {
   "$GMX" grompp -f production.mdp -c npt_noca.gro -t npt_noca.cpt -p topol.top -o "$MD_DEFFNM.tpr" -maxwarn "$MAXWARN"
 }
 run_production() {
   if [[ -s "$MD_DEFFNM.cpt" ]]; then
-    "$GMX" mdrun -deffnm "$MD_DEFFNM" -cpi "$MD_DEFFNM.cpt" -append -v -cpt "$CHECKPOINT_MIN" -nb gpu -pme gpu
+    "$GMX" mdrun -deffnm "$MD_DEFFNM" -cpi "$MD_DEFFNM.cpt" -append -v -cpt "$CHECKPOINT_MIN" "${GPU_OPTS[@]}"
   else
     if [[ -s "$MD_DEFFNM.log" || -s "$MD_DEFFNM.xtc" || -s "$MD_DEFFNM.edr" ]]; then
       echo "ERROR: partial production output exists without a checkpoint; refusing to overwrite." >&2
       return 1
     fi
-    "$GMX" mdrun -deffnm "$MD_DEFFNM" -v -cpt "$CHECKPOINT_MIN" -nb gpu -pme gpu
+    "$GMX" mdrun -deffnm "$MD_DEFFNM" -v -cpt "$CHECKPOINT_MIN" "${GPU_OPTS[@]}"
   fi
 }
 
