@@ -62,7 +62,7 @@ Inspect the pilot log and confirm that there are no fatal errors or persistent L
 Launch the production workflow only after the pilot passes:
 
 ~~~bash
-nohup bash scripts/run_cas12g_replicates.sh env/Cas12g_3rep_400ns.env > cas12g_md.nohup.out 2>&1 &
+nohup bash scripts/run_cas12g_replicates.sh env/Cas12g_3rep_400ns.env --run-only > cas12g_md.nohup.out 2>&1 &
 echo $! > cas12g_md.pid
 tail -f cas12g_md.nohup.out
 ~~~
