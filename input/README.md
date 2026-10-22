@@ -1,11 +1,7 @@
-# Input structures
+# Input structure
 
-Place the locally approved WT PDB here, or set WT_PDB in your local configuration to an external path. The structure is intentionally not committed.
+Provide the WT Cas12g PDB structure locally and set its path in the configuration file. The structure is not distributed in this repository.
 
-For the default V623Q/V623S workflow, the mutation builder expects:
-- chain A present;
-- residue 623 is VAL in the WT structure;
-- a standard protein-only structure with consistent residue numbering;
-- no ligand, RNA, metal, or other nonstandard component that requires a separate topology.
+The current mutation builder expects chain A residue 623 to be valine and generates V623Q and V623S from the WT structure. Check the chain assignment, residue numbering, missing residues, and structural components before running.
 
-The runner's protein-only preparation removes HETATM records. Do not use this default path for a complex whose ligand, RNA, cofactor, or metal is mechanistically required. Check structure provenance, chain mapping, missing residues, alternate conformations, termini, and protonation assumptions before simulation.
+The default preparation retains protein ATOM records and is intended for protein-only systems. If a ligand, RNA, metal, or other non-protein component is required for the system being studied, prepare the complete complex and its compatible topology rather than using the default protein-only workflow.
