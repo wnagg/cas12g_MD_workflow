@@ -1,11 +1,7 @@
-# Methods template: Cas12g molecular dynamics
+# Cas12g molecular dynamics protocol
 
-The WT, V623Q, and V623S Cas12g systems are prepared independently from a common WT starting structure. V623Q and V623S are generated as separate single-point mutants from WT and checked for the expected residue identity before system preparation. The baseline workflow is protein-only/apo; systems containing RNA, ligands, cofactors, or metals require an explicitly prepared complex and compatible topology and are outside this default configuration.
+The scripts prepare WT Cas12g and mutant protein structures derived from a common WT starting structure. The current structure-building script generates the V623Q and V623S point mutants separately from WT and checks the residue identity at the target position before system preparation.
 
-Each system is solvated in a dodecahedral box with a minimum 1.0 nm solute-to-box margin. The default force field and water model are AMBER99SB-ILDN and TIP3P. The system is neutralized and NaCl is added to a nominal concentration of 0.15 M. The equilibration schedule is 100 ps NVT, 1 ns C-alpha-restrained NPT, and 500 ps unrestrained NPT at 300 K and 1 bar. Production uses a 2 fs integration step and the configured trajectory output interval. The intended production target for the comparison panel is 400 ns per independent replica, with three replicas per system and independent initial velocity seeds.
+The default GROMACS setup uses the AMBER99SB-ILDN force field and TIP3P water in a dodecahedral periodic box with a 1.0 nm solute-to-box margin. The system is neutralized and supplemented with NaCl to a nominal concentration of 0.15 M. After energy minimization, the default equilibration protocol consists of 100 ps NVT, 1 ns C-alpha-restrained NPT, and 500 ps unrestrained NPT at 300 K and 1 bar. Production MD uses a 2 fs time step and a configured duration of 400 ns, with coordinates written every 100 ps.
 
-A separate 10 ns WT pilot should be completed first to validate the local GROMACS/PyMOL installation, check numerical stability, inspect temperature/pressure/density and LINCS messages, and estimate throughput. The pilot is a technical validation step, not a convergence test.
-
-Report the actual software versions, hardware, system atom counts, random seeds, warnings, completed production time, and any deviations from this template. Analyze RMSD, radius of gyration, C-alpha RMSF and RMSD–Rg occupancy distributions per trajectory; evaluate replicate consistency and block trends before drawing mechanistic conclusions. An occupancy-derived free-energy-like surface is descriptive and should not be presented as proof of thermodynamic convergence.
-
-This text is a template. Replace any statement that does not match the final executed protocol, input model, or saved run metadata before using it in a manuscript.
+This description reflects the configuration template in the repository. Before using it in a manuscript, verify the settings against the actual input structures, software versions, and simulation parameters used to generate the reported results.
