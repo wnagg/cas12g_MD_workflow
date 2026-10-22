@@ -1,0 +1,25 @@
+# Local configuration and credentials
+env/*.env
+!env/*.env.example
+
+# Starting structures and large simulation outputs
+input/*.pdb
+input/*.pdb.gz
+*.xtc
+*.trr
+*.tng
+*.edr
+*.cpt
+*.tpr
+*.gro
+*.log
+*.xvg
+*.ndx
+*.itp
+topol.top
+mdout.mdp
+*.pyc
+__pycache__/
+.done/
+logs/
+analysis/results/
