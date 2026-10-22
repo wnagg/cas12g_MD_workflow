@@ -1,25 +1,39 @@
-# Local configuration and credentials
-env/*.env
-!env/*.env.example
+# Local configurations (keep only templates in Git)
+*.env
+!*.env.example
 
-# Starting structures and large simulation outputs
-input/*.pdb
-input/*.pdb.gz
+# Starting structures and structure-derived files
+*.pdb
+*.pdb.gz
+*.gro
+*.itp
+topol.top
+mdout.mdp
+
+# GROMACS trajectories, checkpoints and runtime logs
 *.xtc
 *.trr
 *.tng
 *.edr
 *.cpt
 *.tpr
-*.gro
 *.log
 *.xvg
 *.ndx
-*.itp
-topol.top
-mdout.mdp
+*.out
+
+# Generated run state and local result directories
+.done/
+.logs/
+logs/
+.configs/
+.run_signature
+.cas12g_replicates.lock
+pipeline.log
+run_metadata.txt
+run_manifest.json
+analysis/results/
+
+# Python cache
 *.pyc
 __pycache__/
-.done/
-logs/
-analysis/results/
